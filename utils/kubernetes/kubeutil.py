@@ -56,7 +56,7 @@ class KubeUtil:
                 instance = {}
 
         self.method = instance.get('method', KubeUtil.DEFAULT_METHOD)
-        self.host = instance.get("host") or self.docker_util.get_hostname()
+        self.host = instance.get("host") or self.docker_util.get_hostname(should_resolve=True)
         self.kubelet_host = os.environ.get('KUBERNETES_KUBELET_HOST') or self.host
         self._node_ip = self._node_name = None  # lazy evaluation
         self.host_name = os.environ.get('HOSTNAME')
