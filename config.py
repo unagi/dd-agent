@@ -38,6 +38,7 @@ from utils.windows_configuration import get_registry_conf
 
 # CONSTANTS
 AGENT_VERSION = "5.12.0"
+JMX_VERSION = "0.12.0"
 DATADOG_CONF = "datadog.conf"
 UNIX_CONFIG_PATH = '/etc/dd-agent'
 MAC_CONFIG_PATH = '/opt/datadog-agent/etc'
