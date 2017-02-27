@@ -324,7 +324,7 @@ class CheckStatus(object):
                  event_count=None, service_check_count=None, service_metadata=[],
                  init_failed_error=None, init_failed_traceback=None,
                  library_versions=None, source_type_name=None,
-                 check_stats=None):
+                 check_stats=None, check_version=None):
         self.name = check_name
         self.source_type_name = source_type_name
         self.instance_statuses = instance_statuses
@@ -336,6 +336,7 @@ class CheckStatus(object):
         self.library_versions = library_versions
         self.check_stats = check_stats
         self.service_metadata = service_metadata
+        self.check_version = check_version if check_version else "core"
 
     @property
     def status(self):

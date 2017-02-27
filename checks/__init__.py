@@ -10,6 +10,7 @@ The Check class is being deprecated so don't write new checks with it.
 # stdlib
 from collections import defaultdict
 import copy
+import inspect
 import logging
 import numbers
 import os
@@ -26,9 +27,11 @@ try:
 except ImportError:
     psutil = None
 import yaml
+import simplejson as json
 
 # project
 from checks import check_status
+from config import AGENT_VERSION
 from util import get_next_id, yLoader
 from utils.hostname import get_hostname
 from utils.proxy import get_proxy
@@ -350,11 +353,14 @@ class AgentCheck(object):
         self.service_checks = []
         self.instances = instances or []
         self.warnings = []
+        self.check_version = None
         self.library_versions = None
         self.last_collection_time = defaultdict(int)
         self._instance_metadata = []
         self.svc_metadata = []
         self.historate_dict = {}
+
+        self.set_check_version(manifest=self._get_check_manifest())
 
         # Set proxy settings
         self.proxy_settings = get_proxy(self.agentConfig)
@@ -374,6 +380,34 @@ class AgentCheck(object):
                     uri=uri)
             self.proxies['http'] = "http://{uri}".format(uri=uri)
             self.proxies['https'] = "https://{uri}".format(uri=uri)
+
+    def _get_check_manifest(self):
+        """
+        Attempts to collect the the manifest for SDK checks.
+
+        Do not use outside of the constructor, it assumes the following call chain:
+            CheckClass.__init__() -> AgentCheck.__init__() -> AgentCheck._get_check_manifest()
+        """
+        frames = inspect.stack()
+        caller_frame = frames[2]
+        module_path = os.path.dirname(inspect.getmodule(caller_frame).__file__)
+        manifest_path = os.path.join(module_path, 'manifest.json')
+        if os.path.exists(manifest_path):
+            return json.loads(manifest_path)
+
+        return None
+
+    def set_check_version(self, manifest=None):
+        version = AGENT_VERSION
+
+        if manifest:
+            try:
+                version = "{core}:{sdk}".format(core=AGENT_VERSION,
+                                            sdk=manifest.get('version'))
+            except Exception:
+                pass
+
+        self.check_version = version
 
     def instance_count(self):
         """ Return the number of instances that are configured for this check. """
